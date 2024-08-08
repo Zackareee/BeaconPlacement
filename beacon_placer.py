@@ -273,9 +273,9 @@ def coordinate_placement(
   result = [[x + offset[0], y + offset[1]] for x,y in result]
   result = [tuple(arr) for arr in result]
 
-#   if len(result) != len(set(result)):
-#     raise Warning("Not all coordinates are unique. Consider changing the \
-# minimum and maximum radius.'")
+  if len(result) != len(set(result)):
+    raise Warning("Not all coordinates are unique. Consider changing the \
+minimum and maximum radius.'")
   if len(result) != count:
     raise Warning("Not all coordinates were generated. Consider changing \
 the minimum and maximum radius.'")
