@@ -9,15 +9,15 @@ desired angle.
 
 Functions:
     distance_between_two_points(c1, c2): Calculate distance between two points
-    distance_to_centerpoint(x, y): Calculate the distance to the nearest\
+    distance_to_centerpoint(x, y): Calculate the distance to the nearest
       integer coordinate given a float coordinate.
-    x_generator(lower, upper, angle, step): Return a set of coordinates of a\
+    x_generator(lower, upper, angle, step): Return a set of coordinates of a
       point given its angle.
-    y_generator(lower, upper, angle, step): Return a set of coordinates of a\
+    y_generator(lower, upper, angle, step): Return a set of coordinates of a
       point given its angle.
-    custom_sort(item): Return values to sort distance from coordinate, followed\
+    custom_sort(item): Return values to sort distance from coordinate, followed
       by distance from origin.
-    coordinate_placement(count, offset, minimum, maximum): Creates a set of\
+    coordinate_placement(count, offset, minimum, maximum): Creates a set of
       coordinates around a centerpoint equally seperated by angle.
 """
 
@@ -70,10 +70,14 @@ def distance_to_centerpoint(
   distance_br = sqrt(((x - round_up_x) ** 2) + ((y - round_down_y) ** 2))
   return min(distance_tr, distance_bl, distance_tl, distance_br)
 
-def x_generator(lower: int,
+def x_generator(
+  lower: int,
   upper: int,
+  lower_bounds: int,
+  upper_bounds: int,
   angle: float,
-  step: int = 1
+  step: int = 1,
+  debug: bool = False,
   ) -> Generator[List[float], None, None]:
   """
   Return a set of coordinates of a point given its angle.
@@ -89,12 +93,16 @@ def x_generator(lower: int,
   for x in range(lower, upper, step):
     y = angle * x
     distance = distance_between_two_points([0, 0], [x, y])
-    if distance < max(abs(upper), abs(lower)) \
-      and distance > min(abs(upper), abs(lower)):
+    if debug:
+      print(distance)
+    if distance < abs(upper_bounds) and distance > abs(lower_bounds):
       yield([x, angle * x])
 
-def y_generator(lower: int,
+def y_generator(
+  lower: int,
   upper: int,
+  lower_bounds: int,
+  upper_bounds: int,
   angle: float,
   step: int = 1
   ) -> Generator[float, None, None]:
@@ -114,10 +122,61 @@ def y_generator(lower: int,
       x = 0
     else:
       x = y / angle
-    distance = distance_between_two_points([0, 0],[x, y])
-    if distance < max(abs(upper), abs(lower)) and \
-      distance > min(abs(upper), abs(lower)):
+    distance = distance_between_two_points([0, 0], [x, y])
+    if distance < abs(upper_bounds) and distance > abs(lower_bounds):
       yield([x, y])
+
+def coordinate_generator(
+    lower_bounds: int,
+    upper_bounds: int,
+    angle_deg: float
+    ) -> List[Generator[int, None, None]]:
+  """
+  Return a list of coordinates of a point given its angle.
+
+  Args:
+    lower_bounds (int): Minimum radius a point can be at.
+    upper_bounds (int): Maximum adius a point can be at.
+    angle_deg (float): Angle from 0,0 the point is along.
+  Returns:
+    List[Generator[int, None, None]]: Generator for coordinates
+  """
+  angle_tan = tan(radians(angle_deg))
+  if angle_deg < 90:
+    # Top Right Quadrant
+    # Checking x and y points ensures we find the best point in both
+    # distance to an integer coordinate and distance from (0,0).
+    return [
+      x_generator(1, upper_bounds, lower_bounds, upper_bounds, angle_tan)
+    ]
+
+  if angle_deg < 180:
+    # Top left Quadrant
+    # Step -1 ensures better symmetery in coordinate placement.
+    # Checking outwards in prioritizes coordinates closer to (0,0).
+    return [
+      x_generator(
+        -1, -upper_bounds, lower_bounds, upper_bounds, angle_tan, step=-1
+        )
+    ]
+
+  if angle_deg < 270:
+    # Bottom left Quadrant
+    return [
+      x_generator(
+        -1, -upper_bounds, lower_bounds, upper_bounds, angle_tan, step=-1
+        ),
+      y_generator(
+        -1, -upper_bounds, lower_bounds, upper_bounds, angle_tan, step=-1
+        )
+    ]
+
+  if angle_deg < 360:
+    # Bottom right Quadrant
+    return [
+      x_generator(1, upper_bounds, lower_bounds, upper_bounds, angle_tan),
+      y_generator(-1, -upper_bounds, lower_bounds, upper_bounds, angle_tan, step=-1)
+      ]
 
 def custom_sort(
   item: List[Union[int, List[int]]]
@@ -169,6 +228,7 @@ def coordinate_placement(
     tolerance_array = []
 
     angle_deg = (360 / count) * (i + 1)
+    # angle_deg = 356.25
 
     # Axis need edge cases because tan(degrees) will result in divide by
     # zero errors otherwise.
@@ -187,62 +247,27 @@ def coordinate_placement(
           result.append([0,lower_bounds])
         else:
           result.append([0,-lower_bounds])
-
       continue
 
-    angle_tan = tan(radians(angle_deg))
-
-    if angle_deg < 90:
-      # Top Right Quadrant
-      # Checking x and y points ensures we find the best point in both
-      # distance to an integer coordinate and distance from (0,0).
-      points = [
-        x_generator(lower_bounds, upper_bounds, angle_tan),
-        y_generator(lower_bounds, upper_bounds, angle_tan)
-      ]
-
-    if angle_deg > 90 and angle_deg < 180:
-      # Top left Quadrant
-      # Step -1 ensures better symmetery in coordinate placement.
-      # Checking outwards in prioritizes coordinates closer to (0,0).
-      points = [
-        x_generator(-lower_bounds, -upper_bounds, angle_tan, step=-1),
-        y_generator(lower_bounds, upper_bounds, angle_tan)
-      ]
-
-    if angle_deg > 180 and angle_deg < 270:
-      # Bottom left Quadrant
-      points = [
-        x_generator(-lower_bounds, -upper_bounds, angle_tan, step=-1),
-        y_generator(-lower_bounds, -upper_bounds, angle_tan, step=-1)
-      ]
-
-    if angle_deg > 260 and angle_deg < 360:
-      # Bottom right Quadrant
-      points = [
-        x_generator(lower_bounds, upper_bounds, angle_tan),
-        y_generator(-lower_bounds, -upper_bounds, angle_tan, step=-1)
-        ]
-
+    points = coordinate_generator(lower_bounds, upper_bounds, angle_deg)
     points = list(chain.from_iterable(points))
     for x, y in points:
       tolerance_array.append(distance_to_centerpoint(x, y))
 
-
     arr = list(zip(tolerance_array, points))
     arr.sort(key=custom_sort)
-    if len(arr) == 0:
-      raise Warning("Not enough coordinates within the given bounds. Consider \
-changing the minimum and maximum radius.")
+#     if len(arr) == 0:
+#       raise Warning("Not enough coordinates within the given bounds. Consider \
+# changing the minimum and maximum radius.")
     result.append([round(num) for num in arr[0][1]])
 
   result = [[x + offset[0], y + offset[1]] for x,y in result]
   result = [tuple(arr) for arr in result]
 
-  if len(result) != len(set(result)):
-    raise Warning("Not all coordinates are unique. Consider changing the \
-minimum and maximum radius.'")
-  elif len(result) != count:
+#   if len(result) != len(set(result)):
+#     raise Warning("Not all coordinates are unique. Consider changing the \
+# minimum and maximum radius.'")
+  if len(result) != count:
     raise Warning("Not all coordinates were generated. Consider changing \
 the minimum and maximum radius.'")
   return result
