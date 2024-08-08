@@ -182,8 +182,12 @@ def coordinate_generator(
   if angle_deg < 360:
     # Bottom right Quadrant
     return [
-      x_generator(1, upper_bounds, lower_bounds, upper_bounds, angle_tan),
-      y_generator(-1, -upper_bounds, lower_bounds, upper_bounds, angle_tan, step=-1)
+      x_generator(
+        1, upper_bounds, lower_bounds, upper_bounds, angle_tan
+        ),
+      y_generator(
+        -1, -upper_bounds, lower_bounds, upper_bounds, angle_tan, step=-1
+        )
       ]
 
 def custom_sort(
@@ -264,9 +268,6 @@ def coordinate_placement(
 
     arr = list(zip(tolerance_array, points))
     arr.sort(key=custom_sort)
-#     if len(arr) == 0:
-#       raise Warning("Not enough coordinates within the given bounds. Consider \
-# changing the minimum and maximum radius.")
     result.append([round(num) for num in arr[0][1]])
 
   result = [[x + offset[0], y + offset[1]] for x,y in result]
