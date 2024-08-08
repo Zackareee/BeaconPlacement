@@ -246,5 +246,3 @@ minimum and maximum radius.'")
     raise Warning("Not all coordinates were generated. Consider changing \
 the minimum and maximum radius.'")
   return result
-
-print(coordinate_placement(count=96, offset=[0,0], minimum=10, maximum=29))
