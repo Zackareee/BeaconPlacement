@@ -5,6 +5,7 @@ Places points on integer coordinates in an equal distribution around an origin.
 In response to the [Youtube video](https://youtu.be/VcsEm7FnheU?si=LSM72IzqdgnMjRc_) where beacons are shown to be best placed in a non-circular pattern, I have put together a python module to do exactly that in a variable fashion. 
 
 Here we can see a placement of 96 points around the origin with a minimum radius of 30 and a maximum radius of 45. 
+
 <img width="500" alt="Screenshot 2024-08-08 at 6 32 50 pm" src="https://github.com/user-attachments/assets/4de789e5-1811-4345-b6d1-2782eceb6e7e">
 
 The red lines here simply show the equal distribution of points around the origin. 
