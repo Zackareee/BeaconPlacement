@@ -8,7 +8,8 @@ Here we can see a placement of 96 points around the origin with a minimum radius
 <img width="500" alt="Screenshot 2024-08-08 at 6 32 50 pm" src="https://github.com/user-attachments/assets/4de789e5-1811-4345-b6d1-2782eceb6e7e">
 
 The red lines here simply show the equal distribution of points around the origin. 
-This graph can be viewed [here](https://www.desmos.com/calculator/j6ghmovccm)
+This graph can be viewed [here](https://www.desmos.com/calculator/j6ghmovccm).
+
 The same set of coordinates can be generated using a count of 96, and the appropriate minimum and maximum values.
 ```
 import coordinate_placement from beacon_placer
