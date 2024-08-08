@@ -147,7 +147,12 @@ def coordinate_generator(
     # Checking x and y points ensures we find the best point in both
     # distance to an integer coordinate and distance from (0,0).
     return [
-      x_generator(1, upper_bounds, lower_bounds, upper_bounds, angle_tan)
+      x_generator(
+        1, upper_bounds, lower_bounds, upper_bounds, angle_tan
+        ),
+      y_generator(
+        1, upper_bounds, lower_bounds, upper_bounds, angle_tan
+        )
     ]
 
   if angle_deg < 180:
@@ -157,6 +162,9 @@ def coordinate_generator(
     return [
       x_generator(
         -1, -upper_bounds, lower_bounds, upper_bounds, angle_tan, step=-1
+        ),
+      y_generator(
+        1, upper_bounds, lower_bounds, upper_bounds, angle_tan
         )
     ]
 
